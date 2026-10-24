@@ -1,0 +1,26 @@
+# Gizli bilgiler (veritabanı şifresi, JWT anahtarı) depoya konmaz
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Flutter / Dart (ayrıca mobile/.gitignore dosyasına bakın)
+mobile/build/
+mobile/.dart_tool/
+
+# Yüklenen fotoğraflar (7. hafta)
+api/uploads/
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
