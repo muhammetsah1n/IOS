@@ -1,0 +1,10 @@
+# Gizli bilgiler depoya konmaz
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Yüklenen fotoğraflar
+uploads/
