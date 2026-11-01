@@ -1,10 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- API isteklerinde ve Google Fonts yazı tiplerini indirmek için gerekli -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- usesCleartextTraffic: yerel API https değil, http üzerinden çalışıyor -->
     <application
         android:label="Quick-TicK"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

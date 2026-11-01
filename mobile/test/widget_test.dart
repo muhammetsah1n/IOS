@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quick_tick/bilesenler/alt_menu.dart';
 import 'package:quick_tick/ekranlar/giris_ekrani.dart';
 import 'package:quick_tick/ekranlar/kayit_ekrani.dart';
+import 'package:quick_tick/servisler/oturum.dart';
 import 'package:quick_tick/yardimcilar/dogrulayicilar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   // Testlerde yazı tipleri internetten indirilmesin
@@ -49,5 +52,35 @@ void main() {
 
     expect(find.text('Şifreler eşleşmiyor.'), findsOneWidget);
     expect(find.text('Adını yaz.'), findsNothing);
+  });
+
+  test('Kayıtlı token yoksa oturum kapalı başlar', () async {
+    SharedPreferences.setMockInitialValues({});
+    final oturum = Oturum();
+    await oturum.baslat();
+
+    expect(oturum.hazir, isTrue);
+    expect(oturum.girisYapildi, isFalse);
+  });
+
+  testWidgets('Alt menüde sekmeye dokununca sırası bildirilir', (tester) async {
+    int? secilen;
+    var artiSayisi = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AltMenu(
+            seciliSekme: 0,
+            sekmeSecildi: (sira) => secilen = sira,
+            artiBasildi: () => artiSayisi++,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Alışkanlıklar'));
+    expect(secilen, 2);
+    await tester.tap(find.byIcon(Icons.add_rounded));
+    expect(artiSayisi, 1);
   });
 }

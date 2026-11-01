@@ -24,3 +24,6 @@ api/uploads/
 # İşletim sistemi
 .DS_Store
 Thumbs.db
+
+# Tasarım dosyaları yalnızca yerel referans, depoya konmaz
+design/

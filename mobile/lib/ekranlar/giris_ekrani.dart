@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../bilesenler/butonlar.dart';
 import '../bilesenler/form_alani.dart';
 import '../bilesenler/giris_iskeleti.dart';
 import '../bilesenler/onay_kutusu.dart';
+import '../servisler/api_servisi.dart';
+import '../servisler/oturum.dart';
 import '../tema/tema.dart';
 import '../yardimcilar/dogrulayicilar.dart';
 import 'kayit_ekrani.dart';
@@ -22,6 +25,7 @@ class _GirisEkraniState extends State<GirisEkrani> {
   final _sifre = TextEditingController();
   bool _sifreGorunur = false;
   bool _beniHatirla = false;
+  bool _yukleniyor = false;
 
   @override
   void dispose() {
@@ -30,12 +34,23 @@ class _GirisEkraniState extends State<GirisEkrani> {
     super.dispose();
   }
 
-  void _girisYap() {
+  Future<void> _girisYap() async {
     if (!_formAnahtari.currentState!.validate()) return;
 
-    // 2. haftada burada API'ye giriş isteği gönderilecek
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Bilgiler geçerli. API bağlantısı 2. haftada eklenecek.')));
+    setState(() => _yukleniyor = true);
+    try {
+      // Başarılı olursa Oturum değişir ve main.dart ana sayfayı açar
+      await context.read<Oturum>().girisYap(
+        ePosta: _ePosta.text.trim(),
+        sifre: _sifre.text,
+        beniHatirla: _beniHatirla,
+      );
+    } on ApiHatasi catch (hata) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(hata.mesaj)));
+    } finally {
+      if (mounted) setState(() => _yukleniyor = false);
+    }
   }
 
   void _sifremiUnuttum() {
@@ -95,7 +110,7 @@ class _GirisEkraniState extends State<GirisEkrani> {
               ),
             ),
             const SizedBox(height: 12),
-            AnaButon(yazi: 'Giriş yap', onPressed: _girisYap),
+            AnaButon(yazi: 'Giriş yap', onPressed: _girisYap, yukleniyor: _yukleniyor),
             const SizedBox(height: 12),
             AltBaglantiSatiri(
               soru: 'Hesabın yok mu?',

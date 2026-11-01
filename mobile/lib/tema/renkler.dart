@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Tasarımdaki (design/TASARIM.md) renkler
+// Tasarımdaki renkler
 class Renkler {
   static const lacivert = Color(0xFF1B2A4A);
   static const koyuMetin = Color(0xFF0E1424);

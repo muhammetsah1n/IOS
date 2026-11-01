@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../bilesenler/butonlar.dart';
 import '../bilesenler/form_alani.dart';
 import '../bilesenler/giris_iskeleti.dart';
+import '../servisler/api_servisi.dart';
+import '../servisler/oturum.dart';
 import '../tema/renkler.dart';
 import '../tema/tema.dart';
 import '../yardimcilar/dogrulayicilar.dart';
@@ -23,6 +26,7 @@ class _KayitEkraniState extends State<KayitEkrani> {
   final _sifreTekrar = TextEditingController();
   // Tasarımda iki şifre alanı da aynı göz butonuyla birlikte açılıp kapanıyor
   bool _sifreGorunur = false;
+  bool _yukleniyor = false;
 
   @override
   void dispose() {
@@ -33,12 +37,25 @@ class _KayitEkraniState extends State<KayitEkrani> {
     super.dispose();
   }
 
-  void _kayitOl() {
+  Future<void> _kayitOl() async {
     if (!_formAnahtari.currentState!.validate()) return;
 
-    // 2. haftada burada API'ye kayıt isteği gönderilecek
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Bilgiler geçerli. API bağlantısı 2. haftada eklenecek.')));
+    setState(() => _yukleniyor = true);
+    try {
+      await context.read<Oturum>().kayitOl(
+        ad: _ad.text.trim(),
+        ePosta: _ePosta.text.trim(),
+        sifre: _sifre.text,
+      );
+      if (!mounted) return;
+      // Kayıt ekranı giriş ekranının üstünde açıldığı için kapatılır; altta ana sayfa görünür
+      Navigator.of(context).popUntil((sayfa) => sayfa.isFirst);
+    } on ApiHatasi catch (hata) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(hata.mesaj)));
+    } finally {
+      if (mounted) setState(() => _yukleniyor = false);
+    }
   }
 
   @override
@@ -102,7 +119,7 @@ class _KayitEkraniState extends State<KayitEkrani> {
               sagIkon: gozButonu,
             ),
             const SizedBox(height: 12),
-            AnaButon(yazi: 'Kayıt ol', onPressed: _kayitOl),
+            AnaButon(yazi: 'Kayıt ol', onPressed: _kayitOl, yukleniyor: _yukleniyor),
             const SizedBox(height: 12),
             AltBaglantiSatiri(
               soru: 'Zaten hesabın var mı?',

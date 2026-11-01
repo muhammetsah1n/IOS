@@ -11,7 +11,6 @@ BLM4587 IOS İle Mobil Uygulama Geliştirme I (Flutter) dönem projesi, 2026–2
 |---|---|
 | `api/` | Web API — Python, FastAPI, SQLAlchemy, Alembic, PostgreSQL |
 | `mobile/` | Mobil uygulama — Flutter (Android) |
-| `design/` | Arayüz tasarımı ve tasarım rehberi (`design/TASARIM.md`) |
 
 ## Gereksinimler
 
@@ -53,7 +52,11 @@ pip install -r requirements.txt
 
 ```
 DATABASE_URL=postgresql+psycopg2://postgres:SIFRENIZ@localhost:5432/quicktick
+JWT_GIZLI_ANAHTAR=uzun_rastgele_bir_anahtar
+JWT_SURE_DAKIKA=10080
 ```
+
+JWT anahtarı üretmek için: `python -c "import secrets; print(secrets.token_hex(32))"`
 
 `.env` dosyası `.gitignore` içindedir; şifreler depoya gönderilmez.
 
@@ -79,6 +82,23 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - Swagger arayüzü: <http://localhost:8000/docs>
 - Veritabanı bağlantı testi: <http://localhost:8000/saglik>
 
+### Uç noktalar
+
+| Yöntem | Adres | Açıklama |
+|---|---|---|
+| POST | `/auth/kayit` | Kayıt olur (`ad`, `e_posta`, `sifre` en az 8 karakter); token ve kullanıcıyı döndürür |
+| POST | `/auth/giris` | Giriş yapar (`e_posta`, `sifre`); token ve kullanıcıyı döndürür |
+| GET | `/auth/ben` | Token sahibinin bilgileri (`Authorization: Bearer <token>`) |
+
+Swagger'da korumalı uç noktaları denemek için girişte dönen `access_token` değerini
+sağ üstteki **Authorize** butonuna yapıştırın.
+
+**Roller:** Kayıt olan herkes `kullanici` rolüyle başlar. Bir hesabı yönetici yapmak için:
+
+```bash
+psql -U postgres -d quicktick -c "UPDATE kullanicilar SET rol = 'admin' WHERE e_posta = 'ornek@eposta.com';"
+```
+
 ## Mobil uygulama (`mobile/`)
 
 ```bash
@@ -89,8 +109,13 @@ flutter run
 
 ### API adresi
 
-API bağlantısı 2. haftada eklenecek. Android emülatöründen bilgisayardaki API'ye
-`http://10.0.2.2:8000` adresiyle ulaşılır; gerçek cihazda bilgisayarın yerel IP adresi kullanılır.
+Uygulama varsayılan olarak `http://10.0.2.2:8000` adresini kullanır; Android emülatörü bu adresle
+bilgisayardaki API'ye ulaşır. Gerçek cihazda bilgisayarın yerel IP adresi verilir
+(telefon ve bilgisayar aynı ağda olmalı, API `--host 0.0.0.0` ile çalışmalı):
+
+```bash
+flutter run --dart-define=API_ADRESI=http://192.168.1.20:8000
+```
 
 ## Veritabanı tabloları
 
@@ -107,3 +132,6 @@ API bağlantısı 2. haftada eklenecek. Android emülatöründen bilgisayardaki 
 - **1. hafta:** Depo ve klasör yapısı, README taslağı; Flutter projesi, renkler ve yazı tipleri;
   Giriş ve Kayıt ol ekranları (form doğrulama); FastAPI iskeleti ve `.env` ile bağlantı ayarı;
   SQLAlchemy + Alembic kurulumu, `kullanicilar` tablosu ve ilk migration.
+- **2. hafta:** Kayıt ve giriş uç noktaları (bcrypt ile şifre özeti, JWT, roller); Giriş ve Kayıt ol
+  ekranlarının API'ye bağlanması, "Beni hatırla" ile token'ın saklanması; alt menü
+  (Bugün, Takvim, +, Alışkanlıklar, Profil) ve ekranlar arası gezinme, Profil'den çıkış.
