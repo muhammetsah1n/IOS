@@ -3,8 +3,11 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.routers import auth
 
-app = FastAPI(title="Quick-TicK API", version="0.1.0")
+app = FastAPI(title="Quick-TicK API", version="0.2.0")
+
+app.include_router(auth.router)
 
 
 @app.get("/")
