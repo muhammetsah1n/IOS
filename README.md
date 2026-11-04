@@ -89,6 +89,15 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 | POST | `/auth/kayit` | Kayıt olur (`ad`, `e_posta`, `sifre` en az 8 karakter); token ve kullanıcıyı döndürür |
 | POST | `/auth/giris` | Giriş yapar (`e_posta`, `sifre`); token ve kullanıcıyı döndürür |
 | GET | `/auth/ben` | Token sahibinin bilgileri (`Authorization: Bearer <token>`) |
+| GET | `/plans` | Kullanıcının planları; `?tarih=2026-11-03` ile yalnızca o gün |
+| GET | `/plans/{id}` | Tek plan |
+| POST | `/plans` | Plan ekler (`tarih`, `baslangic_saati`, `bitis_saati`, `baslik`, `aciklama`, `renk`, `tamamlandi`) |
+| PUT | `/plans/{id}` | Planı günceller (tüm alanlar gönderilir; "Bitti" işareti de bununla) |
+| DELETE | `/plans/{id}` | Planı siler |
+
+`/plans` uç noktaları giriş yapmış kullanıcı ister; herkes yalnızca kendi planlarını görür
+(başkasının planına istek atılırsa 404 döner). Bitiş saati başlangıçtan sonra olmalı,
+`renk` tasarımdaki dört renkten biri olmalıdır: `#B9CCF5`, `#FFD08A`, `#CFE3B4`, `#F6B79A`.
 
 Swagger'da korumalı uç noktaları denemek için girişte dönen `access_token` değerini
 sağ üstteki **Authorize** butonuna yapıştırın.
@@ -122,7 +131,7 @@ flutter run --dart-define=API_ADRESI=http://192.168.1.20:8000
 | Tablo | Durum |
 |---|---|
 | `kullanicilar` | ✅ 1. hafta |
-| `planlar` | 3. hafta |
+| `planlar` | ✅ 3. hafta |
 | `gorev_gruplari`, `gorevler` | 5. hafta |
 | `listeler`, `liste_ogeleri` | 6. hafta |
 | `aliskanliklar`, `aliskanlik_kayitlari` | 8. hafta |
@@ -135,3 +144,6 @@ flutter run --dart-define=API_ADRESI=http://192.168.1.20:8000
 - **2. hafta:** Kayıt ve giriş uç noktaları (bcrypt ile şifre özeti, JWT, roller); Giriş ve Kayıt ol
   ekranlarının API'ye bağlanması, "Beni hatırla" ile token'ın saklanması; alt menü
   (Bugün, Takvim, +, Alışkanlıklar, Profil) ve ekranlar arası gezinme, Profil'den çıkış.
+- **3. hafta:** `planlar` tablosu ve migration; Plan için tam CRUD uç noktaları (Pydantic doğrulama,
+  kullanıcıya göre yetki); Ana sayfa: selamlama, gün kartı, API'den gelen "Gün planı" listesi,
+  aşağı çekerek yenileme ve planı "Bitti" olarak işaretleme.

@@ -3,11 +3,12 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.routers import auth
+from app.routers import auth, planlar
 
-app = FastAPI(title="Quick-TicK API", version="0.2.0")
+app = FastAPI(title="Quick-TicK API", version="0.3.0")
 
 app.include_router(auth.router)
+app.include_router(planlar.router)
 
 
 @app.get("/")
