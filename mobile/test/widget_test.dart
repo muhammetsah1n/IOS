@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quick_tick/bilesenler/alt_menu.dart';
+import 'package:quick_tick/bilesenler/plan_karti.dart';
+import 'package:quick_tick/modeller/plan.dart';
+import 'package:quick_tick/yardimcilar/tarih.dart';
 import 'package:quick_tick/ekranlar/giris_ekrani.dart';
 import 'package:quick_tick/ekranlar/kayit_ekrani.dart';
 import 'package:quick_tick/servisler/oturum.dart';
@@ -82,5 +85,54 @@ void main() {
     expect(secilen, 2);
     await tester.tap(find.byIcon(Icons.add_rounded));
     expect(artiSayisi, 1);
+  });
+
+  group('Plan', () {
+    final json = {
+      'id': 7,
+      'tarih': '2026-11-03',
+      'baslangic_saati': '09:00:00',
+      'bitis_saati': '10:30:00',
+      'baslik': 'Matematik çalış',
+      'aciklama': null,
+      'renk': '#B9CCF5',
+      'tamamlandi': false,
+    };
+
+    test('API yanıtından okunur ve PUT için geri yazılır', () {
+      final plan = Plan.fromJson(json);
+      expect(plan.baslangic, '09:00');
+      expect(plan.bitis, '10:30');
+
+      final geri = plan.copyWith(tamamlandi: true).toJson();
+      expect(geri['tarih'], '2026-11-03');
+      expect(geri['baslangic_saati'], '09:00');
+      expect(geri['tamamlandi'], isTrue);
+      expect(geri['baslik'], 'Matematik çalış');
+    });
+
+    testWidgets('kutuya dokununca tamamlandı bildirilir', (tester) async {
+      bool? yeniDeger;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PlanKarti(plan: Plan.fromJson(json), tamamlandiDegisti: (d) => yeniDeger = d),
+          ),
+        ),
+      );
+
+      expect(find.text('Matematik çalış'), findsOneWidget);
+      expect(find.text('09:00'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Matematik çalış tamamlandı'));
+      expect(yeniDeger, isTrue);
+    });
+  });
+
+  test('Türkçe tarih yardımcıları', () {
+    final gun = DateTime(2026, 11, 3, 9);
+    expect(Tarih.gunAdi(gun), 'Salı');
+    expect(Tarih.ayYil(gun), 'Kasım 2026');
+    expect(Tarih.apiBicimi(gun), '2026-11-03');
+    expect(Tarih.selamlama(gun), 'Günaydın');
   });
 }

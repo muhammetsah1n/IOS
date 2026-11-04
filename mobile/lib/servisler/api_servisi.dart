@@ -22,14 +22,31 @@ class ApiHatasi implements Exception {
 class ApiServisi {
   static const _zamanAsimi = Duration(seconds: 10);
 
-  static Future<Map<String, dynamic>> get(String yol, {String? token}) {
-    return _istek(() => http.get(Uri.parse('$apiAdresi$yol'), headers: _basliklar(token)));
+  static Future<Map<String, dynamic>> get(String yol, {String? token}) async {
+    return await _istek(() => http.get(Uri.parse('$apiAdresi$yol'), headers: _basliklar(token)))
+        as Map<String, dynamic>;
   }
 
-  static Future<Map<String, dynamic>> post(String yol, Map<String, dynamic> govde, {String? token}) {
-    return _istek(
+  // Liste döndüren uç noktalar için (ör. GET /plans)
+  static Future<List<dynamic>> getListe(String yol, {String? token}) async {
+    return await _istek(() => http.get(Uri.parse('$apiAdresi$yol'), headers: _basliklar(token)))
+        as List<dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> post(String yol, Map<String, dynamic> govde, {String? token}) async {
+    return await _istek(
       () => http.post(Uri.parse('$apiAdresi$yol'), headers: _basliklar(token), body: jsonEncode(govde)),
-    );
+    ) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> put(String yol, Map<String, dynamic> govde, {String? token}) async {
+    return await _istek(
+      () => http.put(Uri.parse('$apiAdresi$yol'), headers: _basliklar(token), body: jsonEncode(govde)),
+    ) as Map<String, dynamic>;
+  }
+
+  static Future<void> delete(String yol, {String? token}) async {
+    await _istek(() => http.delete(Uri.parse('$apiAdresi$yol'), headers: _basliklar(token)));
   }
 
   static Map<String, String> _basliklar(String? token) {
@@ -39,7 +56,8 @@ class ApiServisi {
     };
   }
 
-  static Future<Map<String, dynamic>> _istek(Future<http.Response> Function() gonder) async {
+  // Yanıt gövdesini çözer: nesne için Map, liste için List döner (204'te boş Map)
+  static Future<Object> _istek(Future<http.Response> Function() gonder) async {
     final http.Response yanit;
     try {
       yanit = await gonder().timeout(_zamanAsimi);
@@ -49,10 +67,10 @@ class ApiServisi {
       throw const ApiHatasi('Sunucuya bağlanılamadı. İnternet bağlantını kontrol et.');
     }
 
-    final Map<String, dynamic> veri;
+    final Object veri;
     try {
       final govde = utf8.decode(yanit.bodyBytes);
-      veri = govde.isEmpty ? <String, dynamic>{} : jsonDecode(govde) as Map<String, dynamic>;
+      veri = govde.isEmpty ? <String, dynamic>{} : jsonDecode(govde) as Object;
     } on FormatException {
       // Ör. sunucu hatasında (500) JSON yerine düz metin dönebilir
       throw ApiHatasi('Sunucuda bir hata oluştu.', durumKodu: yanit.statusCode);
@@ -64,8 +82,8 @@ class ApiServisi {
 
   // FastAPI hataları {"detail": "..."} biçiminde gelir.
   // Doğrulama (422) hatalarında detail bir liste olur; o durumda genel bir mesaj gösterilir.
-  static String _hataMesaji(Map<String, dynamic> veri) {
-    final detay = veri['detail'];
+  static String _hataMesaji(Object veri) {
+    final detay = veri is Map<String, dynamic> ? veri['detail'] : null;
     if (detay is String) return detay;
     return 'Girilen bilgiler geçersiz.';
   }

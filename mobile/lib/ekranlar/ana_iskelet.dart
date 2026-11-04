@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../bilesenler/alt_menu.dart';
 import '../bilesenler/yakinda_sayfasi.dart';
-import '../servisler/oturum.dart';
+import 'ana_sayfa.dart';
 import 'profil_ekrani.dart';
 
 // Giriş yapıldıktan sonra açılan ana yapı: üstte seçili sekmenin sayfası, altta alt menü
@@ -26,15 +25,9 @@ class _AnaIskeletState extends State<AnaIskelet> {
 
   @override
   Widget build(BuildContext context) {
-    final ad = context.watch<Oturum>().kullanici?.ad ?? '';
-
     // Sırası alt menüdeki sekmelerle aynı: Bugün, Takvim, Alışkanlıklar, Profil
     final sayfalar = [
-      YakindaSayfasi(
-        baslik: 'Merhaba, $ad',
-        aciklama: 'Gün planı ve yapılacaklar\n3. haftada eklenecek.',
-        ikon: Icons.today_outlined,
-      ),
+      AnaSayfa(profilAc: () => setState(() => _seciliSekme = 3)),
       const YakindaSayfasi(
         baslik: 'Takvim',
         aciklama: 'Aylık takvim 6. haftada eklenecek.',

@@ -18,4 +18,15 @@ class Renkler {
   static const planYesil = Color(0xFFCFE3B4);
   static const planYesilYazi = Color(0xFF25401A);
   static const planSomon = Color(0xFFF6B79A);
+
+  // API'de saklanan renk koduna göre kartın zemin ve yazı rengi
+  static const _planRenkleri = {
+    '#B9CCF5': (planMavi, lacivert),
+    '#FFD08A': (planSari, Color(0xFF3F2A05)),
+    '#CFE3B4': (planYesil, planYesilYazi),
+    '#F6B79A': (planSomon, Color(0xFF4D220E)),
+  };
+
+  static Color planZemin(String kod) => (_planRenkleri[kod] ?? _planRenkleri['#CFE3B4']!).$1;
+  static Color planYazi(String kod) => (_planRenkleri[kod] ?? _planRenkleri['#CFE3B4']!).$2;
 }
